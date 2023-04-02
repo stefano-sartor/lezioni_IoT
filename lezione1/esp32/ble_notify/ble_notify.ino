@@ -1,4 +1,5 @@
 
+#include <BLE2902.h>
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
@@ -35,6 +36,10 @@ void setup() {
   characteristic_touch = servizio_touch->createCharacteristic(
       CHARACTERISTIC_UUID,
       BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY);
+  
+  //  Client Characteristic Configuration Descriptor (CCCD)
+  characteristic_touch->addDescriptor(new BLE2902());
+
   characteristic_touch->setValue("released");
   servizio_touch->start();
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
