@@ -4,6 +4,10 @@ import json
 import paho.mqtt.client as mqtt
 from random import gauss
 
+TOPIC_BASE = "lezioni_iot/ambient/"
+TOPIC_SENSOR = TOPIC_BASE+'stefano'
+TOPIC_STATUS = TOPIC_SENSOR+'_status'
+
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
 
@@ -16,9 +20,12 @@ client.on_connect = on_connect
 client.on_disconnect = on_disconnect
 
 
+client.will_set(TOPIC_STATUS,'offline',qos=2,retain=True)
 client.connect("test.mosquitto.org", 1883, 60)
 
 client.loop_start()
+
+client.publish(TOPIC_STATUS,'online',qos=2,retain=True)
 
 while True:
     data = {}
@@ -26,7 +33,7 @@ while True:
     data['temp'] = gauss(20,2)
     data['relhum'] = gauss(50,1)
     data['press'] = gauss(950,5)
-    client.publish('lezioni_iot/ambient/stefano',json.dumps(data))
+    client.publish(TOPIC_BASE+'stefano',json.dumps(data))
     time.sleep(10)
 
 client.disconnect()
