@@ -1,0 +1,33 @@
+version: '3.0'
+services:
+  postgres:
+    image: timescale/timescaledb:2.9.3-pg14
+    restart: always
+    volumes:
+      - "$PWD/backup:/backup:ro"
+      - "$PWD/postgres:/postgres:rw"
+      - "$PWD/postgres/initdb:/docker-entrypoint-initdb.d:rw"
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=adminPassword
+      - PGDATA=/postgres/pg_timescale
+    ports:
+      - 5432:5432
+  grafana:
+    image: grafana/grafana:9.4.7
+    restart: always
+    volumes:
+#      - "$PWD/grafana:/grafana:rw"
+      - "$PWD/grafana/grafana.ini:/grafana.ini:rw"
+    environment:
+#      - GF_PATHS_CONFIG=/grafana/grafana.ini
+      - GF_PATHS_CONFIG=/grafana.ini
+#      - GF_PATHS_DATA=/grafana/data
+#      - GF_PATHS_LOGS=/grafana/logs
+#      - GF_PATHS_PLUGINS=/grafana/plugins
+#      - GF_PATHS_PROVISIONING=/grafana/provisioning
+    ports:
+      - 3000:3000
+    depends_on:
+      - postgres
+#    user: ${CURRENT_UID}
