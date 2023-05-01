@@ -1,0 +1,40 @@
+version: '3.0'
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0.15
+    restart: always
+    volumes:
+      - "./mosquitto:/mosquitto:rw"
+    ports:
+      - 1883:1883
+  postgres:
+    image: timescale/timescaledb:2.9.3-pg14
+    restart: always
+    volumes:
+      - "./postgres:/postgres:rw"
+      - "./postgres/initdb:/docker-entrypoint-initdb.d:rw"
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=adminPassword
+      - PGDATA=/postgres/pg_timescale
+  grafana:
+    image: grafana/grafana:9.4.7
+    restart: always
+    volumes:
+      - "./grafana/grafana.ini:/grafana.ini:rw"
+    environment:
+      - GF_PATHS_CONFIG=/grafana.ini
+    ports:
+      - 3000:3000
+    depends_on:
+      - postgres
+  db_ingestor:
+    image: pymqtt:0.1
+    restart: always
+    volumes:
+      - "./python/app:/home/user/app:rw"
+    depends_on:
+      - postgres
+    working_dir: /home/user/app
+    command: python db_ingestor.py
+#    command: tail -f /dev/null
